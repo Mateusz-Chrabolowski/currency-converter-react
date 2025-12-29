@@ -1,3 +1,25 @@
+import styled from "styled-components";
+
+const Form = styled.form.attrs({
+  className: "currency-converter__form",
+})``;
+
+const Label = styled.label.attrs({
+  className: "currency-converter__label",
+})``;
+
+const Input = styled.input.attrs({
+  className: "currency-converter__input",
+})``;
+
+const Select = styled.select.attrs({
+  className: "currency-converter__select",
+})``;
+
+const Button = styled.button.attrs({
+  className: "currency-converter__button",
+})``;
+
 function ConverterForm({
   amount,
   setAmount,
@@ -7,25 +29,20 @@ function ConverterForm({
   onConvert,
 }) {
   return (
-    <form
-      className="currency-converter__form"
-      onSubmit={(e) => e.preventDefault()}
-    >
-      <label className="currency-converter__label">
+    <Form onSubmit={(e) => e.preventDefault()}>
+      <Label>
         Kwota w zł:
-        <input
+        <Input
           type="number"
-          className="currency-converter__input"
           min="1"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-      </label>
+      </Label>
 
-      <label className="currency-converter__label">
+      <Label>
         Wybierz walutę:
-        <select
-          className="currency-converter__select"
+        <Select
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
         >
@@ -33,27 +50,18 @@ function ConverterForm({
           <option value="CHF">Frank szwajcarski (CHF)</option>
           <option value="GBP">Funt brytyjski (GBP)</option>
           <option value="SEK">Korona szwedzka (SEK)</option>
-        </select>
-      </label>
+        </Select>
+      </Label>
 
-      <label className="currency-converter__label">
+      <Label>
         Aktualny kurs:
-        <input
-          type="number"
-          className="currency-converter__input"
-          value={rate}
-          readOnly
-        />
-      </label>
+        <Input type="number" value={rate} readOnly />
+      </Label>
 
-      <button
-        type="button"
-        className="currency-converter__button"
-        onClick={onConvert}
-      >
+      <Button type="button" onClick={onConvert}>
         Przelicz
-      </button>
-    </form>
+      </Button>
+    </Form>
   );
 }
 
