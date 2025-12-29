@@ -6,23 +6,30 @@ import rates from "./data/rates";
 function App() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("EUR");
+
+  // ✅ Kurs pokazujemy od razu (na starcie i po zmianie waluty)
   const [rate, setRate] = useState(rates.EUR);
+
+  // ✅ Wynik liczony dopiero po kliknięciu
   const [result, setResult] = useState(null);
 
-  // 🔹 aktualizuj kurs NATYCHMIAST po zmianie waluty
+  // 1) Zmiana waluty -> natychmiast aktualizuj kurs
   useEffect(() => {
     setRate(rates[currency]);
   }, [currency]);
 
-  // 🔹 automatyczne przeliczanie po zmianie kwoty lub kursu
-  useEffect(() => {
-    if (!amount) {
+  // 2) Klik "Przelicz" -> dopiero wtedy policz wynik
+  const handleConvert = () => {
+    const value = Number(amount);
+
+    // prosta walidacja
+    if (!Number.isFinite(value) || value <= 0) {
       setResult(null);
       return;
     }
 
-    setResult((amount / rate).toFixed(2));
-  }, [amount, rate]);
+    setResult((value / rate).toFixed(2));
+  };
 
   return (
     <main className="currency-converter">
@@ -34,6 +41,7 @@ function App() {
         currency={currency}
         setCurrency={setCurrency}
         rate={rate}
+        onConvert={handleConvert}
       />
 
       <ConverterResult result={result} currency={currency} />
