@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ConverterForm from "./components/ConverterForm/ConverterForm";
 import ConverterResult from "./components/ConverterResult/ConverterResult";
 import rates from "./data/rates";
+import Clock from "./components/Clock/Clock";
 
 function App() {
   const [amount, setAmount] = useState("");
@@ -29,6 +30,7 @@ function App() {
 
   return (
     <main className="currency-converter">
+      <Clock/>
       <h1 className="currency-converter__title">Kalkulator walut</h1>
 
       <ConverterForm
