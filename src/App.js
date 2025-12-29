@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import ConverterForm from "./components/ConverterForm/ConverterForm";
+import ConverterResult from "./components/ConverterResult/ConverterResult";
+import rates from "./data/rates";
 
 function App() {
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("EUR");
+  const [rate, setRate] = useState(rates.EUR);
+  const [result, setResult] = useState(null);
+
+  // 🔹 aktualizuj kurs NATYCHMIAST po zmianie waluty
+  useEffect(() => {
+    setRate(rates[currency]);
+  }, [currency]);
+
+  // 🔹 automatyczne przeliczanie po zmianie kwoty lub kursu
+  useEffect(() => {
+    if (!amount) {
+      setResult(null);
+      return;
+    }
+
+    setResult((amount / rate).toFixed(2));
+  }, [amount, rate]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main className="currency-converter">
+      <h1 className="currency-converter__title">Kalkulator walut</h1>
+
+      <ConverterForm
+        amount={amount}
+        setAmount={setAmount}
+        currency={currency}
+        setCurrency={setCurrency}
+        rate={rate}
+      />
+
+      <ConverterResult result={result} currency={currency} />
+    </main>
   );
 }
 
