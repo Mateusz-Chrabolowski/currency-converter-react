@@ -27,16 +27,25 @@ function ConverterForm({
   setCurrency,
   rate,
   onConvert,
+  disabled,
+  currencyCodes,
 }) {
   return (
-    <Form onSubmit={(e) => e.preventDefault()}>
+    <Form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onConvert();
+      }}
+    >
       <Label>
         Kwota w zł:
         <Input
           type="number"
           min="1"
+          step="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          disabled={disabled}
         />
       </Label>
 
@@ -45,20 +54,22 @@ function ConverterForm({
         <Select
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
+          disabled={disabled}
         >
-          <option value="EUR">Euro (EUR)</option>
-          <option value="CHF">Frank szwajcarski (CHF)</option>
-          <option value="GBP">Funt brytyjski (GBP)</option>
-          <option value="SEK">Korona szwedzka (SEK)</option>
+          {currencyCodes.map((code) => (
+            <option key={code} value={code}>
+              {code}
+            </option>
+          ))}
         </Select>
       </Label>
 
       <Label>
-        Aktualny kurs:
-        <Input type="number" value={rate} readOnly />
+        Aktualny kurs (1 {currency} = ? PLN):
+        <Input type="number" value={rate ?? ""} readOnly />
       </Label>
 
-      <Button type="button" onClick={onConvert}>
+      <Button type="submit" disabled={disabled}>
         Przelicz
       </Button>
     </Form>
