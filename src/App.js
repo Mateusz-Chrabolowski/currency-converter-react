@@ -21,7 +21,7 @@ function App() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("EUR");
 
-  const [rates, setRates] = useState({}); // np. { EUR: 4.31, CHF: 4.55, ... }
+  const [rates, setRates] = useState({});
   const [rate, setRate] = useState(null);
 
   const [result, setResult] = useState(null);
@@ -31,16 +31,15 @@ function App() {
 
   const [effectiveDate, setEffectiveDate] = useState(null);
 
-  // lista kodów walut do selecta (posortowana)
-  const currencyCodes = useMemo(() => {
-    return Object.keys(rates).sort();
-  }, [rates]);
+  const currencyCodes = useMemo(() => Object.keys(rates).sort(), [rates]);
 
   useEffect(() => {
+    setLoading(true);
+
     fetch("https://api.nbp.pl/api/exchangerates/tables/A?format=json")
-      .then((response) => {
-        if (!response.ok) throw new Error("Błąd API NBP");
-        return response.json();
+      .then((res) => {
+        if (!res.ok) throw new Error("Błąd API NBP");
+        return res.json();
       })
       .then((data) => {
         const table = data[0];
@@ -53,10 +52,12 @@ function App() {
 
         setRates(ratesObject);
 
-        // ustaw startową walutę: EUR jeśli jest, w innym wypadku pierwsza z listy
-        const initial = ratesObject.EUR ? "EUR" : Object.keys(ratesObject)[0];
-        setCurrency(initial);
-        setRate(ratesObject[initial]);
+        const initialCurrency = ratesObject.EUR
+          ? "EUR"
+          : Object.keys(ratesObject)[0];
+
+        setCurrency(initialCurrency);
+        setRate(ratesObject[initialCurrency]);
 
         setLoading(false);
       })
@@ -68,10 +69,8 @@ function App() {
 
   const handleCurrencyChange = (newCurrency) => {
     setCurrency(newCurrency);
-    if (rates[newCurrency]) {
-      setRate(rates[newCurrency]);
-      setResult(null); // czyścimy wynik po zmianie waluty
-    }
+    setRate(rates[newCurrency]);
+    setResult(null);
   };
 
   const handleConvert = () => {
@@ -82,8 +81,6 @@ function App() {
       return;
     }
 
-    // ✅ POPRAWNE PRZELICZANIE: PLN -> waluta
-    // 1 waluta = rate PLN, więc PLN / rate = waluta
     setResult((value / rate).toFixed(2));
   };
 
@@ -104,14 +101,17 @@ function App() {
             setCurrency={handleCurrencyChange}
             rate={rate}
             onConvert={handleConvert}
-            disabled={!rate}
+            disabled={loading}
             currencyCodes={currencyCodes}
           />
 
           <ConverterResult result={result} currency={currency} />
 
           {effectiveDate && (
-            <Info>Kursy walut pobierane są z NBP. Aktualne na dzień: {effectiveDate}</Info>
+            <Info>
+              Kursy walut pobierane są z NBP. Aktualne na dzień:{" "}
+              <strong>{effectiveDate}</strong>
+            </Info>
           )}
         </>
       )}
