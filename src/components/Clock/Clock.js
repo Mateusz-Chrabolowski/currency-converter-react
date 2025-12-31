@@ -1,13 +1,20 @@
-import "./Clock.css";
-import useCurrentDate from "../../hooks/useCurrentDate";
+import { useEffect, useState } from "react";
 
-const Clock = () => {
-  const date = useCurrentDate();
+function Clock() {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="clock">
+    <div style={{ textAlign: "right", fontSize: 12, color: "#5b6b84" }}>
       Dzisiaj jest{" "}
-      {date.toLocaleString("pl-PL", {
+      {now.toLocaleString("pl-PL", {
         weekday: "long",
         day: "numeric",
         hour: "2-digit",
@@ -16,6 +23,6 @@ const Clock = () => {
       })}
     </div>
   );
-};
+}
 
 export default Clock;

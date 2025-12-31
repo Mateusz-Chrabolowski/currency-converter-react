@@ -1,121 +1,69 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-
+import Clock from "./components/Clock/Clock";
 import ConverterForm from "./components/ConverterForm/ConverterForm";
 import ConverterResult from "./components/ConverterResult/ConverterResult";
-import Clock from "./components/Clock/Clock";
 
-const Main = styled.main.attrs({
-  className: "currency-converter",
-})``;
+const Page = styled.div`
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background-image: url("${process.env.PUBLIC_URL}/currency_converter_background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+`;
 
-const Title = styled.h1.attrs({
-  className: "currency-converter__title",
-})``;
-
-const Info = styled.p.attrs({
-  className: "currency-converter__info",
-})``;
+const Card = styled.main`
+  width: 100%;
+  max-width: 520px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  font-family: "Roboto", system-ui, sans-serif;
+`;
 
 function App() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("EUR");
-
-  const [rates, setRates] = useState({});
-  const [rate, setRate] = useState(null);
-
+  const [currencies, setCurrencies] = useState([]);
   const [result, setResult] = useState(null);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const [effectiveDate, setEffectiveDate] = useState(null);
-
-  const currencyCodes = useMemo(() => Object.keys(rates).sort(), [rates]);
-
   useEffect(() => {
-    setLoading(true);
-
     fetch("https://api.nbp.pl/api/exchangerates/tables/A?format=json")
-      .then((res) => {
-        if (!res.ok) throw new Error("Błąd API NBP");
-        return res.json();
-      })
-      .then((data) => {
-        const table = data[0];
-        setEffectiveDate(table.effectiveDate);
-
-        const ratesObject = {};
-        table.rates.forEach(({ code, mid }) => {
-          ratesObject[code] = mid;
-        });
-
-        setRates(ratesObject);
-
-        const initialCurrency = ratesObject.EUR
-          ? "EUR"
-          : Object.keys(ratesObject)[0];
-
-        setCurrency(initialCurrency);
-        setRate(ratesObject[initialCurrency]);
-
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Nie udało się pobrać kursów");
-        setLoading(false);
-      });
+      .then((r) => r.json())
+      .then((data) => setCurrencies(data[0].rates))
+      .catch(() => setCurrencies([]));
   }, []);
 
-  const handleCurrencyChange = (newCurrency) => {
-    setCurrency(newCurrency);
-    setRate(rates[newCurrency]);
-    setResult(null);
-  };
-
-  const handleConvert = () => {
-    const value = Number(amount);
-
-    if (!Number.isFinite(value) || value <= 0 || !rate) {
-      setResult(null);
-      return;
-    }
-
-    setResult((value / rate).toFixed(2));
+  const onSubmit = () => {
+    const selected = currencies.find((c) => c.code === currency);
+    if (!selected) return;
+    const a = Number(amount);
+    if (!Number.isFinite(a)) return;
+    setResult((a * selected.mid).toFixed(2));
   };
 
   return (
-    <Main>
-      <Clock />
-      <Title>Kalkulator walut</Title>
+    <Page>
+      <Card>
+        <Clock />
+        <h1>Kalkulator walut</h1>
+        <p>Wpisz kwotę, wybierz walutę i przelicz na PLN.</p>
 
-      {loading && <p>Pobieranie kursów…</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <ConverterForm
+          amount={amount}
+          setAmount={setAmount}
+          currency={currency}
+          setCurrency={setCurrency}
+          currencies={currencies}
+          onSubmit={onSubmit}
+        />
 
-      {!loading && !error && (
-        <>
-          <ConverterForm
-            amount={amount}
-            setAmount={setAmount}
-            currency={currency}
-            setCurrency={handleCurrencyChange}
-            rate={rate}
-            onConvert={handleConvert}
-            disabled={loading}
-            currencyCodes={currencyCodes}
-          />
-
-          <ConverterResult result={result} currency={currency} />
-
-          {effectiveDate && (
-            <Info>
-              Kursy walut pobierane są z NBP. Aktualne na dzień:{" "}
-              <strong>{effectiveDate}</strong>
-            </Info>
-          )}
-        </>
-      )}
-    </Main>
+        <ConverterResult result={result} />
+      </Card>
+    </Page>
   );
 }
 

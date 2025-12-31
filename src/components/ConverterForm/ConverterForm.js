@@ -1,77 +1,70 @@
 import styled from "styled-components";
 
-const Form = styled.form.attrs({
-  className: "currency-converter__form",
-})``;
+const Form = styled.div`
+  display: grid;
+  gap: 12px;
+`;
 
-const Label = styled.label.attrs({
-  className: "currency-converter__label",
-})``;
+const Label = styled.label`
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+`;
 
-const Input = styled.input.attrs({
-  className: "currency-converter__input",
-})``;
+const Input = styled.input`
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #cfe2ff;
+`;
 
-const Select = styled.select.attrs({
-  className: "currency-converter__select",
-})``;
+const Select = styled.select`
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #cfe2ff;
+`;
 
-const Button = styled.button.attrs({
-  className: "currency-converter__button",
-})``;
+const Button = styled.button`
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #1a73e8;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+`;
 
 function ConverterForm({
   amount,
   setAmount,
   currency,
   setCurrency,
-  rate,
-  onConvert,
-  disabled,
-  currencyCodes,
+  currencies = [],
+  onSubmit,
 }) {
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onConvert();
-      }}
-    >
+    <Form>
       <Label>
-        Kwota w zł:
+        Kwota
         <Input
           type="number"
-          min="1"
-          step="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          disabled={disabled}
+          placeholder="np. 100"
         />
       </Label>
 
       <Label>
-        Wybierz walutę:
-        <Select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-          disabled={disabled}
-        >
-          {currencyCodes.map((code) => (
-            <option key={code} value={code}>
-              {code}
+        Waluta
+        <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+          {currencies.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.code} — {c.currency}
             </option>
           ))}
         </Select>
       </Label>
 
-      <Label>
-        Aktualny kurs (1 {currency} = ? PLN):
-        <Input type="number" value={rate ?? ""} readOnly />
-      </Label>
-
-      <Button type="submit" disabled={disabled}>
-        Przelicz
-      </Button>
+      <Button onClick={onSubmit}>Przelicz</Button>
     </Form>
   );
 }
